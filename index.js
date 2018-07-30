@@ -14,54 +14,52 @@ if( fs.existsSync(path)) {
 }
 
 !async function () {
-    let boxAccounts = await DomainAccountBoxConnect.findAll({
-        //limit: 5,
-        where:{
-            isBinding:true
+    let boxSum = await DomainBoxSum.findAll();
+
+    let boxSUMArr = [];
+
+    boxSum.forEach((boxsunitem) => {
+        item = boxsunitem.dataValues;
+        if (item.boxSN && item.boxSN.length == 14) {
+                boxSUMArr.push(item);
         }
     });
-    let boxAccountArr = [];
-
-    boxAccounts.forEach((boxAccount) => {
-        boxAccount = boxAccount.dataValues;
-        if (boxAccount.boxSN && boxAccount.boxSN.length == 14) {
-            boxAccountArr.push(boxAccount);
-        }
-    })
-    for (var item of boxAccountArr) {
+    for (var item of boxSUMArr) {
         let resultObj = {}
         let boxIp = ''
-        resultObj.account = item.account;
-        resultObj.boxSN = item.boxSN;
-        let boxSum = await DomainBoxSum.findOne({
-            where: {
-                boxSN: item.boxSN
+        let boxAccount = await DomainAccountBoxConnect.findOne({
+            where:{
+                boxSN:item.boxSN,
+                isBinding:true
             }
-        })
+        });
 
-        if (boxSum && boxSum.dataValues) {
-            boxIp = boxSum.boxIp;
-            if (boxIp && boxIp.startsWith("::ffff:")) { 
-                boxIp = boxIp.slice(7);
-            } else {
-                console.log("fail to get boxip with boxSN" + resultObj.boxSN);
-                continue;
-            }
-            const res = query.search(boxIp);
-            if (res) {
-                resultObj.province = res.province;
-                resultObj.city = res.city;
-            }
+        resultObj.account = boxAccount ? boxAccount.account : "           ";
+        resultObj.boxSN = item.boxSN;
+
+        boxIp = item.boxIp;
+        if (boxIp && boxIp.startsWith("::ffff:")) { 
+            boxIp = boxIp.slice(7);
+        } else {
+            // console.log("fail to get boxip with boxSN" + resultObj.boxSN);
+            continue;
         }
+        const res = query.search(boxIp);
+        if (res) {
+            resultObj.province = res.province;
+            resultObj.city = res.city;
+        }
+
         resultObj.boxIp = boxIp;
         let sum = await DomainCoinEveryDay.sum("miningCoin",{
             where: {
                 boxSN: item.boxSN
             }
         });
-        resultObj.sum = sum;
+        resultObj.sum = sum ? sum : 0;
         result.push(resultObj);
-        console.log('push',result.length);
+        let str = resultObj.account + "    " + resultObj.boxSN + "    " + resultObj.boxIp + "    " + resultObj.province + "    " + resultObj.city+ "    " + resultObj.sum + '';
+        console.log(result.length,str);
     }
 
     for (var obj of result) {
