@@ -1,0 +1,17 @@
+{
+  "name": "sn_ip_table",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ip2region": "^1.4.0",
+    "moment": "^2.22.2",
+    "pg": "^7.4.3",
+    "sequelize": "^4.38.0"
+  }
+}
