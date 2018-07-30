@@ -24,7 +24,7 @@ if( fs.existsSync(path)) {
                 boxSUMArr.push(item);
         }
     });
-    return digui(0,200,200,boxSUMArr).then(finish=>{
+    return digui(0,10,10,boxSUMArr).then(finish=>{
         console.log('finish');
     });
 }();
@@ -39,10 +39,9 @@ function digui(start , end, limit ,arraySN){
     });
 }
 
-
+let resultObj = {}
 function deal(boxSUMArr){
     let boxSumAll = boxSUMArr.map(item=>{
-        let resultObj = {}
         let boxIp = ''
         return DomainAccountBoxConnect.findOne({
             where:{
