@@ -8,7 +8,7 @@ const IP2Region = require('ip2region');
 const query = new IP2Region();
 
 result = [];
-const path = "./result.txt"
+const path = "./result_cjq.txt"
 if( fs.existsSync(path)) {
     fs.unlinkSync(path);
 }
@@ -24,49 +24,54 @@ if( fs.existsSync(path)) {
                 boxSUMArr.push(item);
         }
     });
-    for (var item of boxSUMArr) {
+
+    let boxSumAll = boxSUMArr.map(item=>{
         let resultObj = {}
         let boxIp = ''
-        let boxAccount = await DomainAccountBoxConnect.findOne({
+        return DomainAccountBoxConnect.findOne({
             where:{
                 boxSN:item.boxSN,
                 isBinding:true
             }
-        });
-
-        resultObj.account = boxAccount ? boxAccount.account : "           ";
-        resultObj.boxSN = item.boxSN;
-
-        boxIp = item.boxIp;
-        if (boxIp && boxIp.startsWith("::ffff:")) { 
-            boxIp = boxIp.slice(7);
-        } else {
-            // console.log("fail to get boxip with boxSN" + resultObj.boxSN);
-            continue;
-        }
-        const res = query.search(boxIp);
-        if (res) {
-            resultObj.province = res.province;
-            resultObj.city = res.city;
-        }
-
-        resultObj.boxIp = boxIp;
-        let sum = await DomainCoinEveryDay.sum("miningCoin",{
-            where: {
-                boxSN: item.boxSN
+        }).then(boxAccount=>{
+            resultObj.account = boxAccount ? boxAccount.account : "           ";
+            resultObj.boxSN = item.boxSN;
+            boxIp = item.boxIp;
+            if (boxIp && boxIp.startsWith("::ffff:")) { 
+                boxIp = boxIp.slice(7);
+            } else {
+                // console.log("fail to get boxip with boxSN" + resultObj.boxSN);
+                return;
             }
+            const res = query.search(boxIp);
+            if (res) {
+                resultObj.province = res.province;
+                resultObj.city = res.city;
+            }
+    
+            resultObj.boxIp = boxIp;
+            return DomainCoinEveryDay.sum("miningCoin",{
+                where: {
+                    boxSN: item.boxSN
+                }
+            }).then(sum=>{
+                resultObj.sum = sum ? sum : 0;
+                result.push(resultObj);
+                let str = resultObj.account + "    " + resultObj.boxSN + "    " + resultObj.boxIp + "    " + resultObj.province + "    " + resultObj.city+ "    " + resultObj.sum + '';
+                console.log(result.length,str);
+                return resultObj;
+            });
         });
-        resultObj.sum = sum ? sum : 0;
-        result.push(resultObj);
-        let str = resultObj.account + "    " + resultObj.boxSN + "    " + resultObj.boxIp + "    " + resultObj.province + "    " + resultObj.city+ "    " + resultObj.sum + '';
-        console.log(result.length,str);
-    }
-
-    for (var obj of result) {
-        var str = obj.account + "    " + obj.boxSN + "    " + obj.boxIp + "    " + obj.province + "    " + obj.city+ "    " + obj.sum + '\n';
-        fs.writeFileSync(path, str, {flag: 'a', encoding: 'utf8'});
-    }
-    console.log('finish');
+    });
+    return Promise.all(boxSumAll).then(resultObjs=>{
+        for (var obj of resultObjs) {
+            if(obj){
+                var str = obj.account + "    " + obj.boxSN + "    " + obj.boxIp + "    " + obj.province + "    " + obj.city+ "    " + obj.sum + '\n';
+                fs.writeFileSync(path, str, {flag: 'a', encoding: 'utf8'});
+            }
+        }
+        console.log('finish');
+    });
 }();
 
 
