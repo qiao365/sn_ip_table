@@ -24,7 +24,23 @@ if( fs.existsSync(path)) {
                 boxSUMArr.push(item);
         }
     });
+    return digui(0,200,200,boxSUMArr).then(finish=>{
+        console.log('finish');
+    });
+}();
 
+
+function digui(start , end, limit ,arraySN){
+    let data = arraySN.slice(start,end);
+    return deal(data).then((back)=>{
+        if(end < arraySN.length){
+            return digui(start+limit, end+limit, limit, arraySN);
+        }
+    });
+}
+
+
+function deal(boxSUMArr){
     let boxSumAll = boxSUMArr.map(item=>{
         let resultObj = {}
         let boxIp = ''
@@ -70,8 +86,9 @@ if( fs.existsSync(path)) {
                 fs.writeFileSync(path, str, {flag: 'a', encoding: 'utf8'});
             }
         }
-        console.log('finish');
+        // console.log('finish');
+        return resultObjs;
     });
-}();
+}
 
 
