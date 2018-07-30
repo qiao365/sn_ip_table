@@ -8,7 +8,7 @@ var sequelize = new Sequelize(APP, APP, `${APP}`, {
         underscored: true
     },
     pool: {
-        max: 30,
+        max: 10,
         min: 0,
         acquire: 30000,
         idle: 2000

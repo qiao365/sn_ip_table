@@ -7,7 +7,7 @@ const fs = require('fs');
 const IP2Region = require('ip2region');
 const query = new IP2Region();
 
-result = [];
+let result = [];
 const path = "./result_cjq.txt"
 if( fs.existsSync(path)) {
     fs.unlinkSync(path);
@@ -15,16 +15,14 @@ if( fs.existsSync(path)) {
 
 !async function () {
     let boxSum = await DomainBoxSum.findAll();
-
     let boxSUMArr = [];
-
     boxSum.forEach((boxsunitem) => {
         item = boxsunitem.dataValues;
         if (item.boxSN && item.boxSN.length == 14) {
                 boxSUMArr.push(item);
         }
     });
-    return digui(0,20,20,boxSUMArr).then(finish=>{
+    return digui(0,10,10,boxSUMArr).then(finish=>{
         console.log('finish');
     });
 }();
@@ -39,10 +37,11 @@ function digui(start , end, limit ,arraySN){
     });
 }
 
-let resultObj = {}
 function deal(boxSUMArr){
+
     let boxSumAll = boxSUMArr.map(item=>{
         let boxIp = ''
+        let resultObj = {}
         return DomainAccountBoxConnect.findOne({
             where:{
                 boxSN:item.boxSN,
