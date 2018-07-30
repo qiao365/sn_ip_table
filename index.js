@@ -24,7 +24,7 @@ if( fs.existsSync(path)) {
                 boxSUMArr.push(item);
         }
     });
-    return digui(0,10,10,boxSUMArr).then(finish=>{
+    return digui(0,20,20,boxSUMArr).then(finish=>{
         console.log('finish');
     });
 }();
